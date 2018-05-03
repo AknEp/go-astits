@@ -838,7 +838,7 @@ func parseDescriptors(i []byte, offset *int) (o []*Descriptor) {
 	// Loop
 	if length > 0 {
 		length += *offset
-		for *offset < length {
+		for *offset < length && *offset+length < len(i) {
 			// Init
 			var d = &Descriptor{
 				Length: uint8(i[*offset+1]),

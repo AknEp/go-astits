@@ -25,10 +25,7 @@ func newPacketBuffer(r io.Reader, packetSize int) (pb *packetBuffer, err error) 
 	// Packet size is not set
 	if pb.packetSize == 0 {
 		// Auto detect packet size
-		if pb.packetSize, err = autoDetectPacketSize(r); err != nil {
-			err = errors.Wrap(err, "astits: auto detecting packet size failed")
-			return
-		}
+		pb.packetSize = 188
 	}
 	return
 }

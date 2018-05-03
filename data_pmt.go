@@ -37,7 +37,7 @@ func parsePMTSection(i []byte, offset *int, offsetSectionsEnd int, tableIDExtens
 	d.ProgramDescriptors = parseDescriptors(i, offset)
 
 	// Loop until end of section data is reached
-	for *offset < offsetSectionsEnd {
+	for *offset < offsetSectionsEnd && *offset+4 < len(i) {
 		// Stream type
 		var e = &PMTElementaryStream{}
 		e.StreamType = uint8(i[*offset])

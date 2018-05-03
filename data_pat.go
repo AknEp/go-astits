@@ -15,11 +15,13 @@ type PATProgram struct {
 
 // parsePATSection parses a PAT section
 func parsePATSection(i []byte, offset *int, offsetSectionsEnd int, tableIDExtension uint16) (d *PATData) {
+
+	//fmt.Println("parsePATSection: ", *offset, "offsetSectionEnd: ", offsetSectionsEnd, "byteLen: ", len(i), "bytes: ", i)
 	// Init
 	d = &PATData{TransportStreamID: tableIDExtension}
 
 	// Loop until end of section data is reached
-	for *offset < offsetSectionsEnd {
+	for *offset < offsetSectionsEnd && *offset+4 < len(i) {
 		d.Programs = append(d.Programs, &PATProgram{
 			ProgramMapID:  uint16(i[*offset+2]&0x1f)<<8 | uint16(i[*offset+3]),
 			ProgramNumber: uint16(i[*offset])<<8 | uint16(i[*offset+1]),

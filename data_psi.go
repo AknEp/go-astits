@@ -1,8 +1,6 @@
 package astits
 
 import (
-	"fmt"
-
 	"github.com/asticode/go-astilog"
 	"github.com/pkg/errors"
 )
@@ -105,13 +103,17 @@ func parsePSISection(i []byte, offset *int) (s *PSISection, stop bool, err error
 	s = &PSISection{}
 
 	// Parse header
-	var offsetStart, offsetSectionsEnd, offsetEnd int
-	s.Header, offsetStart, _, offsetSectionsEnd, offsetEnd = parsePSISectionHeader(i, offset)
+	var offsetSectionsEnd int
+	s.Header, _, _, offsetSectionsEnd, _ = parsePSISectionHeader(i, offset)
 
 	// Check whether we need to stop the parsing
 	if shouldStopPSIParsing(s.Header.TableType) {
 		stop = true
 		return
+	}
+
+	if s.Header.TableType == PSITableTypePAT {
+		stop = true
 	}
 
 	// Check whether there's a syntax section
@@ -120,7 +122,7 @@ func parsePSISection(i []byte, offset *int) (s *PSISection, stop bool, err error
 		s.Syntax = parsePSISectionSyntax(i, offset, s.Header, offsetSectionsEnd)
 
 		// Process CRC32
-		if hasCRC32(s.Header.TableType) {
+		/*	if hasCRC32(s.Header.TableType) {
 			// Parse CRC32
 			s.CRC32 = parseCRC32(i[offsetSectionsEnd:offsetEnd])
 			*offset += 4
@@ -131,7 +133,7 @@ func parsePSISection(i []byte, offset *int) (s *PSISection, stop bool, err error
 				err = fmt.Errorf("astits: Table CRC32 %x != computed CRC32 %x", s.CRC32, c)
 				return
 			}
-		}
+		}*/
 	}
 	return
 }
@@ -188,6 +190,8 @@ func parsePSISectionHeader(i []byte, offset *int) (h *PSISectionHeader, offsetSt
 	h.PrivateBit = i[*offset]&0x40 > 0
 
 	// Section length
+	//fmt.Println("sectionLengthOffset: ", *offset, "TableID: ", h.TableID)
+	//debug.PrintStack()
 	h.SectionLength = uint16(i[*offset]&0xf)<<8 | uint16(i[*offset+1])
 	*offset += 2
 
@@ -309,9 +313,9 @@ func parsePSISectionSyntaxData(i []byte, offset *int, h *PSISectionHeader, sh *P
 	case PSITableTypeDIT:
 		// TODO Parse DIT
 	case PSITableTypeEIT:
-		d.EIT = parseEITSection(i, offset, offsetSectionsEnd, sh.TableIDExtension)
+		//d.EIT = parseEITSection(i, offset, offsetSectionsEnd, sh.TableIDExtension)
 	case PSITableTypeNIT:
-		d.NIT = parseNITSection(i, offset, sh.TableIDExtension)
+		//d.NIT = parseNITSection(i, offset, sh.TableIDExtension)
 	case PSITableTypePAT:
 		d.PAT = parsePATSection(i, offset, offsetSectionsEnd, sh.TableIDExtension)
 	case PSITableTypePMT:
@@ -319,7 +323,7 @@ func parsePSISectionSyntaxData(i []byte, offset *int, h *PSISectionHeader, sh *P
 	case PSITableTypeRST:
 		// TODO Parse RST
 	case PSITableTypeSDT:
-		d.SDT = parseSDTSection(i, offset, offsetSectionsEnd, sh.TableIDExtension)
+		//d.SDT = parseSDTSection(i, offset, offsetSectionsEnd, sh.TableIDExtension)
 	case PSITableTypeSIT:
 		// TODO Parse SIT
 	case PSITableTypeST:
