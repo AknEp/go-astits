@@ -73,7 +73,12 @@ func parsePacket(i []byte) (p *Packet, err error) {
 	p = &Packet{Bytes: i}
 
 	// In case packet size is bigger than 188 bytes, we don't care for the first bytes
-	i = i[len(i)-188+1:]
+	switch len(i) {
+	case 204:
+		i = i[1:188]
+	default:
+		i = i[len(i)-188+1:]
+	}
 
 	// Parse header
 	p.Header = parsePacketHeader(i)
@@ -102,11 +107,11 @@ func payloadOffset(h *PacketHeader, a *PacketAdaptationField) (offset int) {
 // parsePacketHeader parses the packet header
 func parsePacketHeader(i []byte) *PacketHeader {
 	return &PacketHeader{
-		ContinuityCounter:         uint8(i[2] & 0xf),
-		HasAdaptationField:        i[2]&0x20 > 0,
-		HasPayload:                i[2]&0x10 > 0,
-		PayloadUnitStartIndicator: i[0]&0x40 > 0,
-		PID: uint16(i[0]&0x1f)<<8 | uint16(i[1]),
+		ContinuityCounter:          uint8(i[2] & 0xf),
+		HasAdaptationField:         i[2]&0x20 > 0,
+		HasPayload:                 i[2]&0x10 > 0,
+		PayloadUnitStartIndicator:  i[0]&0x40 > 0,
+		PID:                        uint16(i[0]&0x1f)<<8 | uint16(i[1]),
 		TransportErrorIndicator:    i[0]&0x80 > 0,
 		TransportPriority:          i[0]&0x20 > 0,
 		TransportScramblingControl: uint8(i[2]) >> 6 & 0x3,
