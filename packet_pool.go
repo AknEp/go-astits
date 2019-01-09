@@ -53,6 +53,12 @@ func (b *packetPool) add(p *Packet) (ps []*Packet) {
 		return
 	}
 
+        // If it's TOT, return it immidiately. (don't pool.)
+        if p.Header.PID == totPID {
+                ps = []*Packet{p}
+                return
+        }
+
 	// Add packet
 	if len(mps) > 0 || (len(mps) == 0 && p.Header.PayloadUnitStartIndicator) {
 		mps = append(mps, p)
